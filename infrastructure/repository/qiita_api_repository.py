@@ -11,8 +11,7 @@ class QiitaApiRepository:
         """
         url = f"https://qiita.com/api/v2/items?page={page}&per_page=100"
 
-        # テスト用(QiitaAPIのレートリミット厳しいからテストはこっちで)
-        # Dockerでjson-serverを立ち上げてから実行
+        # テスト用
         # url = "http://localhost:3000/items"
 
         try:
