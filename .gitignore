@@ -1,3 +1,5 @@
 venv/
 
 function.zip
+
+.local_env

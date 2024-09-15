@@ -1,0 +1,14 @@
+version : "2"
+
+services :
+
+  json-server:
+    container_name: json-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    tty: true
+    volumes:
+      - ./data:/data
+    ports:
+      - "3000:3000"
