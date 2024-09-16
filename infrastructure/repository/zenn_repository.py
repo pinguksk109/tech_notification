@@ -5,7 +5,7 @@ class ZennApiRepository:
     def __init__(self):
         pass
 
-    def get_items(self, page) -> dict:
+    def get_items(self, page):
         """
         Zenn APIから最新の記事を取得します
         """
