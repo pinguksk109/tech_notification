@@ -1,10 +1,21 @@
+# 概要
+テック記事からおすすめの記事を抽出して、Lineに通知する  
+LINEの環境変数は自分でLine Developerで発行する
+
+対応記事
+* Qiita
+
+# ロジック
+Qiita
+* 直近3日間くらいの記事を取得して、いいねが多い数に5つ抽出する
+
 # ローカルで動かす
-Qiitaのレートリミットは1時間に60回までなので注意(1度の実行で10回リクエストする)
+QiitaAPIは1時間に60回までなので注意(1度の実行で10回リクエストする)
 ```sh
 python driver.py
 ```
 
-# Deploy手順(検討中)
+# Deploy手順
 Lambdaで動かす
 
 ## 1 作業用ディレクトリの作成
@@ -27,3 +38,8 @@ zip -r ../lambda_package.zip .
 cd ..
 rm -rf lambda_package
 rm -rf lambda_package.zip
+
+# pychacheをいったん消したいとき
+```
+find . -type d -name __pycache__ -exec rm -r {} \+
+```

@@ -8,7 +8,7 @@ class LineRepository:
         self.to = os.environ['LINE_USER_ID']
         self.bearer_token = os.environ['LINE_BEARER_TOKEN']
 
-    def send_message(self, message):
+    def send_message(self, message) -> None:
         message = [
             {"type": "text", "text": message}
         ]

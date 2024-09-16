@@ -5,7 +5,7 @@ class QiitaApiRepository:
     def __init__(self):
         pass
 
-    def get_items(self, page):
+    def get_items(self, page) -> dict:
         """
         Qiita APIから最新の記事を取得します
         """

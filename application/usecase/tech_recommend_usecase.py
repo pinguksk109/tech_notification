@@ -12,13 +12,14 @@ class QiitaRecommendOutput(IOutput, BaseModel):
     items: List[Item]
 
 class TechRecommendUsecase:
+    QIITA_TARGET_PAGE_COUNT = 10
+
     def __init__(self, qiita_api_repository: QiitaApiRepository):
         self.qiita_api_repository = qiita_api_repository
-        pass
 
     def qiita_handle(self) -> QiitaRecommendOutput:
 
-        page_numbers = range(1, 11)
+        page_numbers = range(1, self.QIITA_TARGET_PAGE_COUNT+1)
         responses = [self._get_qiita_items(page) for page in page_numbers]
 
         items: List[Item] = []

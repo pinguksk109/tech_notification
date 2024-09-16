@@ -12,7 +12,7 @@ class LineUsecase:
         self.line_repository = line_repository
         pass
 
-    def handle(self, input_data: LineSendInput):
+    def handle(self, input_data: LineSendInput) -> None:
         message = _create_message(input_data.items)
         self.line_repository.send_message(message)
 
