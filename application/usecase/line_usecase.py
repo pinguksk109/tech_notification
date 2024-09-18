@@ -4,15 +4,18 @@ from infrastructure.repository.line_repository import LineRepository
 from application.base import IInput
 from domain.item import Item
 from datetime import datetime
+import pytz
 
 class LineSendInput(IInput, BaseModel):
     qiita_items: List[Item]
     zenn_items: List[Item]
 
 class LineUsecase:
+    JST = pytz.timezone('Asia/Tokyo')
+
     def __init__(self, line_repository: LineRepository):
         self.line_repository = line_repository
-        self.today_date = datetime.now().strftime("%Y-%m-%d")
+        self.today_date = datetime.now(self.JST).strftime("%Y-%m-%d")
 
     def handle(self, input_data: LineSendInput) -> None:
         message = _create_message(self, input_data.qiita_items, "Qiita")
