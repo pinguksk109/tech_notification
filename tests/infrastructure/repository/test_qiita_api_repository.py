@@ -45,7 +45,7 @@ class TestQiitaApiRepository(unittest.TestCase):
             repository.get_items(page=1)
 
     @patch('infrastructure.repository.qiita_api_repository.requests.get')
-    def test_クエストに失敗した場合_Exceptionをスローすること(self, mock_get):
+    def test_リクエストに失敗した場合_Exceptionをスローすること(self, mock_get):
         mock_get.side_effect = Exception()
 
         repository = QiitaApiRepository()
