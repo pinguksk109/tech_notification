@@ -19,4 +19,4 @@ class LineRepository:
         except Exception as e:
             raise Exception(f"Lineへのメッセージ送信リクエストに失敗しました {e}")
         if(response.status_code != HTTPStatus.OK):
-            raise Exception(f"Line APIから200以外が返却されました。ステータスコード: {response.status_code} レスポンス内容: {response.text}")
+            raise Exception(f"Line APIから200以外が返却されました。ステータスコード: {response.status_code} レスポンス内容: {response.text} メッセージリクエスト内容: {message}")

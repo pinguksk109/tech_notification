@@ -5,6 +5,10 @@ from application.base import IInput
 from domain.item import Item
 from datetime import datetime
 import pytz
+import logging
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
 
 class LineSendInput(IInput, BaseModel):
     qiita_items: List[Item]
