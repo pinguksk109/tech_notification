@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 from application.usecase.tech_recommend_usecase import TechRecommendUsecase, QiitaRecommendOutput, ZennRecommendOutput
 from domain.item import Item
 
+
 class TestTechRecommendUsecase(unittest.TestCase):
 
     def setUp(self):
@@ -11,7 +12,7 @@ class TestTechRecommendUsecase(unittest.TestCase):
 
         self.usecase = TechRecommendUsecase(
             qiita_api_repository=self.mock_qiita_api_repository,
-            zenn_api_repository = self.mock_zenn_api_repository
+            zenn_api_repository=self.mock_zenn_api_repository
         )
 
     def test_qiita_handle_処理が成功した場合_おすすめ記事を返すこと(self):
@@ -61,24 +62,44 @@ class TestTechRecommendUsecase(unittest.TestCase):
         actual = self.usecase.qiita_handle()
 
         self.assertEqual(len(actual.items), 5)
-        self.assertEqual(actual.items[0].title, "Introduction to LLM Evaluation Methods")
-        self.assertEqual(actual.items[0].url, "https://example.com/articles/123456")
+        self.assertEqual(
+            actual.items[0].title,
+            "Introduction to LLM Evaluation Methods")
+        self.assertEqual(
+            actual.items[0].url,
+            "https://example.com/articles/123456")
         self.assertEqual(actual.items[0].likes_count, 20)
 
-        self.assertEqual(actual.items[1].title, "Introduction to LLM Evaluation Methods")
-        self.assertEqual(actual.items[1].url, "https://example.com/articles/123456")
+        self.assertEqual(
+            actual.items[1].title,
+            "Introduction to LLM Evaluation Methods")
+        self.assertEqual(
+            actual.items[1].url,
+            "https://example.com/articles/123456")
         self.assertEqual(actual.items[1].likes_count, 20)
 
-        self.assertEqual(actual.items[2].title, "Introduction to LLM Evaluation Methods")
-        self.assertEqual(actual.items[2].url, "https://example.com/articles/123456")
+        self.assertEqual(
+            actual.items[2].title,
+            "Introduction to LLM Evaluation Methods")
+        self.assertEqual(
+            actual.items[2].url,
+            "https://example.com/articles/123456")
         self.assertEqual(actual.items[2].likes_count, 20)
 
-        self.assertEqual(actual.items[3].title, "Introduction to LLM Evaluation Methods")
-        self.assertEqual(actual.items[3].url, "https://example.com/articles/123456")
+        self.assertEqual(
+            actual.items[3].title,
+            "Introduction to LLM Evaluation Methods")
+        self.assertEqual(
+            actual.items[3].url,
+            "https://example.com/articles/123456")
         self.assertEqual(actual.items[3].likes_count, 20)
 
-        self.assertEqual(actual.items[4].title, "Introduction to LLM Evaluation Methods")
-        self.assertEqual(actual.items[4].url, "https://example.com/articles/123456")
+        self.assertEqual(
+            actual.items[4].title,
+            "Introduction to LLM Evaluation Methods")
+        self.assertEqual(
+            actual.items[4].url,
+            "https://example.com/articles/123456")
         self.assertEqual(actual.items[4].likes_count, 20)
 
     def test_zenn_handle_処理が成功した場合_おすすめ記事を返すこと(self):
@@ -104,32 +125,48 @@ class TestTechRecommendUsecase(unittest.TestCase):
                         "id": 123456,
                         "username": "sampleuser",
                         "name": "Sample User",
-                        "avatar_small_url": "https://example.com/sample-avatar.jpg"
-                    },
-                    "publication": None
-                }
-            ]
-        }
+                        "avatar_small_url": "https://example.com/sample-avatar.jpg"},
+                    "publication": None}]}
 
         actual = self.usecase.zenn_handle()
 
         self.assertEqual(len(actual.items), 5)
-        self.assertEqual(actual.items[0].title, "Sample Title: How to Create a Project with Angular CLI without Git")
-        self.assertEqual(actual.items[0].url, "https://zenn.dev/sample_user/articles/angular-cli-tips")
+        self.assertEqual(
+            actual.items[0].title,
+            "Sample Title: How to Create a Project with Angular CLI without Git")
+        self.assertEqual(
+            actual.items[0].url,
+            "https://zenn.dev/sample_user/articles/angular-cli-tips")
         self.assertEqual(actual.items[0].likes_count, 5)
 
-        self.assertEqual(actual.items[1].title, "Sample Title: How to Create a Project with Angular CLI without Git")
-        self.assertEqual(actual.items[1].url, "https://zenn.dev/sample_user/articles/angular-cli-tips")
+        self.assertEqual(
+            actual.items[1].title,
+            "Sample Title: How to Create a Project with Angular CLI without Git")
+        self.assertEqual(
+            actual.items[1].url,
+            "https://zenn.dev/sample_user/articles/angular-cli-tips")
         self.assertEqual(actual.items[1].likes_count, 5)
 
-        self.assertEqual(actual.items[2].title, "Sample Title: How to Create a Project with Angular CLI without Git")
-        self.assertEqual(actual.items[2].url, "https://zenn.dev/sample_user/articles/angular-cli-tips")
+        self.assertEqual(
+            actual.items[2].title,
+            "Sample Title: How to Create a Project with Angular CLI without Git")
+        self.assertEqual(
+            actual.items[2].url,
+            "https://zenn.dev/sample_user/articles/angular-cli-tips")
         self.assertEqual(actual.items[2].likes_count, 5)
 
-        self.assertEqual(actual.items[3].title, "Sample Title: How to Create a Project with Angular CLI without Git")
-        self.assertEqual(actual.items[3].url, "https://zenn.dev/sample_user/articles/angular-cli-tips")
+        self.assertEqual(
+            actual.items[3].title,
+            "Sample Title: How to Create a Project with Angular CLI without Git")
+        self.assertEqual(
+            actual.items[3].url,
+            "https://zenn.dev/sample_user/articles/angular-cli-tips")
         self.assertEqual(actual.items[3].likes_count, 5)
 
-        self.assertEqual(actual.items[4].title, "Sample Title: How to Create a Project with Angular CLI without Git")
-        self.assertEqual(actual.items[4].url, "https://zenn.dev/sample_user/articles/angular-cli-tips")
+        self.assertEqual(
+            actual.items[4].title,
+            "Sample Title: How to Create a Project with Angular CLI without Git")
+        self.assertEqual(
+            actual.items[4].url,
+            "https://zenn.dev/sample_user/articles/angular-cli-tips")
         self.assertEqual(actual.items[4].likes_count, 5)

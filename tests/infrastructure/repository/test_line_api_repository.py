@@ -3,6 +3,7 @@ from unittest.mock import patch, Mock
 from infrastructure.repository.line_repository import LineRepository
 from http import HTTPStatus
 
+
 class TestLieApiRepository(unittest.TestCase):
 
     @patch('infrastructure.repository.line_repository.requests.post')
