@@ -1,6 +1,8 @@
 # 概要
-テック記事からおすすめの記事を抽出して、Lineに通知する  
-LINEの環境変数は自分でLine Developerで発行する
+テック記事からおすすめの記事を抽出して、LNEに通知する  
+LINEの環境変数は自分で[Line Developer](https://developers.line.biz/ja/)で発行する
+
+AWS Lambdaで動かすことを想定している
 
 対応記事
 * Qiita
@@ -16,7 +18,7 @@ python driver.py
 ```
 
 # Deploy手順
-Lambdaで動かす
+AWS Lambdaで動かす
 
 ## 1 作業用ディレクトリの作成
 mkdir lambda_package
@@ -32,7 +34,7 @@ cd lambda_package
 zip -r ../lambda_package.zip .
 
 ## 5 Lambdaに手動でアップロード
-手動で
+手動でAWSの画面で生成したZipをアップロード
 
 ## 6 削除
 cd ..
