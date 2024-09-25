@@ -4,11 +4,12 @@ from infrastructure.repository.zenn_repository import ZennApiRepository
 from http import HTTPStatus
 from typing import List, Dict, Any
 
+
 class TestQiitaApiRepository(unittest.TestCase):
-    
+
     @patch('infrastructure.repository.zenn_repository.requests.get')
     def test_処理が成功した場合_レスポンスを返すこと(self, mock_get):
-        
+
         mock_response = Mock()
         mock_response.status_code = HTTPStatus.OK
         mock_response.json.return_value = self.mock_zenn_response()
@@ -65,12 +66,9 @@ class TestQiitaApiRepository(unittest.TestCase):
                         "id": 123456,
                         "username": "sampleuser",
                         "name": "Sample User",
-                        "avatar_small_url": "https://example.com/sample-avatar.jpg"
-                    },
-                    "publication": None
-                }
-            ]
-        }
+                        "avatar_small_url": "https://example.com/sample-avatar.jpg"},
+                    "publication": None}]}
+
 
 if __name__ == '__main__':
     unittest.main()

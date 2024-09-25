@@ -10,9 +10,11 @@ import logging
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
+
 class LineSendInput(IInput, BaseModel):
     qiita_items: List[Item]
     zenn_items: List[Item]
+
 
 class LineUsecase:
     JST = pytz.timezone('Asia/Tokyo')
@@ -27,8 +29,10 @@ class LineUsecase:
         message = _create_message(self, input_data.zenn_items, "Zenn")
         self.line_repository.send_message(message)
 
+
 def _create_message(self, items: List[Item], media: str) -> str:
     formatted_items = []
     for i, item in enumerate(items):
-        formatted_items.append(f"{i+1}. {item.title} {item.url}")
-    return f"{self.today_date}の{media}おすすめ記事を送ります✍\n\n" + "\n".join(formatted_items)
+        formatted_items.append(f"{i + 1}. {item.title} {item.url}")
+    return f"{self.today_date}の{media}おすすめ記事を送ります✍\n\n" + \
+        "\n".join(formatted_items)
