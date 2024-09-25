@@ -1,6 +1,7 @@
 import requests
 from http import HTTPStatus
 
+
 class ZennApiRepository:
     def __init__(self):
         pass
@@ -15,6 +16,9 @@ class ZennApiRepository:
             response = requests.get(url)
         except Exception as e:
             raise Exception(f"Zenn APIのリクエストに失敗しました エラー内容: {e}")
-        if(response.status_code != HTTPStatus.OK):
-            raise Exception(f"Qiita APIから200以外が返却されました。ステータスコード: {response.status_code} レスポンス内容: {response.text}")
+        if (response.status_code != HTTPStatus.OK):
+            raise Exception(
+                f"Qiita APIから200以外が返却されました。ステータスコード: {
+                    response.status_code} レスポンス内容: {
+                    response.text}")
         return response.json()

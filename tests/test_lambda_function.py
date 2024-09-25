@@ -4,13 +4,19 @@ from lambda_function import lambda_handler
 from application.usecase.tech_recommend_usecase import QiitaRecommendOutput, ZennRecommendOutput
 from domain.item import Item
 
+
 class TestLambdaHandler(unittest.TestCase):
 
     @patch('lambda_function.LineUsecase')
     @patch('lambda_function.TechRecommendUsecase')
     @patch('lambda_function.QiitaApiRepository')
     @patch('lambda_function.ZennApiRepository')
-    def test_処理が成功した場合_200を返すこと(self, mock_zenn_repository, mock_qiita_repository, mock_tech_recommend_usecase, mock_line_usecase):
+    def test_処理が成功した場合_200を返すこと(
+            self,
+            mock_zenn_repository,
+            mock_qiita_repository,
+            mock_tech_recommend_usecase,
+            mock_line_usecase):
 
         mock_tech_recommend_usecase = mock_tech_recommend_usecase.return_value
 
@@ -38,7 +44,12 @@ class TestLambdaHandler(unittest.TestCase):
     @patch('lambda_function.TechRecommendUsecase')
     @patch('lambda_function.QiitaApiRepository')
     @patch('lambda_function.ZennApiRepository')
-    def test_qiitaの処理を行うusecaseでExceptionがスローされた場合_500を返すこと(self, mock_zenn_repository, mock_qiita_repository, mock_tech_recommend_usecase, mock_line_usecase):
+    def test_qiitaの処理を行うusecaseでExceptionがスローされた場合_500を返すこと(
+            self,
+            mock_zenn_repository,
+            mock_qiita_repository,
+            mock_tech_recommend_usecase,
+            mock_line_usecase):
 
         mock_tech_recommend_usecase = mock_tech_recommend_usecase.return_value
         mock_tech_recommend_usecase.qiita_handle.side_effect = Exception()
@@ -61,7 +72,12 @@ class TestLambdaHandler(unittest.TestCase):
     @patch('lambda_function.TechRecommendUsecase')
     @patch('lambda_function.QiitaApiRepository')
     @patch('lambda_function.ZennApiRepository')
-    def test_zennの処理を行うusecaseでExceptionがスローされた場合_500を返すこと(self, mock_zenn_repository, mock_qiita_repository, mock_tech_recommend_usecase, mock_line_usecase):
+    def test_zennの処理を行うusecaseでExceptionがスローされた場合_500を返すこと(
+            self,
+            mock_zenn_repository,
+            mock_qiita_repository,
+            mock_tech_recommend_usecase,
+            mock_line_usecase):
 
         mock_tech_recommend_usecase = mock_tech_recommend_usecase.return_value
         mock_tech_recommend_usecase.qiita_handle.return_value = QiitaRecommendOutput(
@@ -84,7 +100,12 @@ class TestLambdaHandler(unittest.TestCase):
     @patch('lambda_function.TechRecommendUsecase')
     @patch('lambda_function.QiitaApiRepository')
     @patch('lambda_function.ZennApiRepository')
-    def test_メッセージを送るusecaseでExceptionがスローされた場合_500を返すこと(self, mock_zenn_repository, mock_qiita_repository, mock_tech_recommend_usecase, mock_line_usecase):
+    def test_メッセージを送るusecaseでExceptionがスローされた場合_500を返すこと(
+            self,
+            mock_zenn_repository,
+            mock_qiita_repository,
+            mock_tech_recommend_usecase,
+            mock_line_usecase):
 
         mock_tech_recommend_usecase = mock_tech_recommend_usecase.return_value
         mock_tech_recommend_usecase.qiita_handle.return_value = QiitaRecommendOutput(
