@@ -59,7 +59,6 @@ class TestTechRecommendUsecase(unittest.TestCase):
         ]
 
         actual = self.usecase.qiita_handle()
-        print(actual)
 
         self.assertEqual(len(actual.items), 5)
         self.assertEqual(actual.items[0].title, "Introduction to LLM Evaluation Methods")
