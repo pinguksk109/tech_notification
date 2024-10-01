@@ -15,6 +15,7 @@ class LineSendInput(IInput, BaseModel):
     qiita_items: List[Item]
     zenn_items: List[Item]
     abnormal_train: List[str]
+    weather_forecast: str
 
 
 class LineUsecase:
@@ -25,6 +26,8 @@ class LineUsecase:
         self.today_date = datetime.now(self.JST).strftime("%Y-%m-%d")
 
     def handle(self, input_data: LineSendInput) -> None:
+        weather_message = _create_weather_forecast_message(self, input_data.weather_forecast)
+        self.line_repository.send_message(weather_message)
         train_info_message = _create_train_info_message(self, input_data.abnormal_train)
         self.line_repository.send_message(train_info_message)
         qiita_message = _create_message(self, input_data.qiita_items, "Qiita")
@@ -46,3 +49,6 @@ def _create_train_info_message(self, abnormal_train: List[str]) -> str:
     else:
         delayed_trains = ", ".join(abnormal_train)
         return f"{self.today_date}: 以下の電車で遅延が発生しています: {delayed_trains}。詳細はこちら: https://subway.osakametro.co.jp/guide/subway_information.php"
+    
+def _create_weather_forecast_message(self, weather_forecast: str) -> str:
+    return f"{self.today_date}の天気予報です: {weather_forecast}\n 詳しくはこちら: https://www.jma.go.jp/bosai/forecast/#area_type=offices&area_code=270000"
