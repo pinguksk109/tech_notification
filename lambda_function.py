@@ -6,7 +6,9 @@ from application.usecase.recommend_article_usecase import (
     RecommendArticleUsecase,
 )
 from infrastructure.repository.line_repository import LineRepository
-from infrastructure.repository.scraper_repository import ScraperRepository
+from infrastructure.repository.osaka_metro_repository import (
+    OsakaMetroRepository,
+)
 from infrastructure.repository.weather_repository import WeatherRepository
 from infrastructure.repository.qiita_article_repository import (
     QiitaArticleRepository,
@@ -22,13 +24,11 @@ def lambda_handler(event, context):
 
         weather_repository = WeatherRepository()
         weather_usecase = WeatherUsecase(weather_repository)
-        # 大阪市の天気情報を取得
         weather_output = weather_usecase.handle()
 
-        scraper_repository = ScraperRepository()
+        scraper_repository = OsakaMetroRepository()
         train_info_usecase = TrainInfoUsecase(scraper_repository)
-        # 大阪メトロの情報を取得
-        abnormal_train_output = train_info_usecase.handle()
+        train_output = train_info_usecase.handle()
 
         usecase_qiita = RecommendArticleUsecase(QiitaArticleRepository())
         output_qiita = usecase_qiita.handle()
@@ -41,7 +41,7 @@ def lambda_handler(event, context):
             LineSendInput(
                 qiita_items=output_qiita.items,
                 zenn_items=output_zenn.items,
-                abnormal_train=abnormal_train_output.abnormal_train,
+                abnormal_train=train_output.abnormal_train,
                 weather_forecast=weather_output.forecast,
             )
         )
