@@ -6,9 +6,7 @@ It is designed to run on **AWS Lambda** and currently supports:
 * ✅ Qiita
 * ✅ Zenn
 * 🚇 Osaka Metro train status
-* ☀️ Weather forecast in Osaka
-
-> LINE credentials (User ID, Bearer Token) must be obtained from [LINE Developers](https://developers.line.biz/en/).
+* ☀️ Weather forecast in Osaka (with AI summarization)
 
 ---
 
@@ -18,6 +16,7 @@ It is designed to run on **AWS Lambda** and currently supports:
 * Selects the top 5 most liked articles from each platform within the last 3 days
 * Scrapes Osaka Metro's delay information
 * Gets daily weather forecast from the Japan Meteorological Agency (JMA)
+* Weather forecast is summarized using AI (Gemini) because the raw JMA content is often difficult for general users to understand
 * Formats and sends all data as LINE messages
 
 ---
@@ -30,8 +29,18 @@ The following environment variables must be set to run the Lambda function:
 | ------------------- | ----------------------------------- |
 | `LINE_USER_ID`      | LINE user ID to send messages to    |
 | `LINE_BEARER_TOKEN` | Bearer token for LINE Messaging API |
+| `GEMINI_API_KEY`    | API key for Gemini model access     |
 
 These should be securely stored using AWS Lambda's environment variable settings.
+If running locally, these can be set in a `.env` file at the project root:
+
+```env
+LINE_USER_ID=your_line_user_id
+LINE_BEARER_TOKEN=your_line_bearer_token
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+---
 
 # Run Locally
 
