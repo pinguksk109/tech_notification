@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from application.domain.weather import Weather
 
 
 class IWeatherRepository(ABC):
     @abstractmethod
-    def fetch(self, area_code: int):
+    def fetch(self) -> Weather:
         pass

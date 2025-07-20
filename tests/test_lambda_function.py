@@ -1,7 +1,7 @@
 import pytest
-from unittest.mock import patch, MagicMock
+import asyncio
+from unittest.mock import patch, MagicMock, AsyncMock
 from lambda_function import lambda_handler
-from application.usecase.line_usecase import LineUsecase
 from application.usecase.train_info_usecase import TrainInfoOutput
 from application.usecase.weather_usecase import WeatherOutput
 from application.usecase.recommend_article_usecase import RecommendOutput
@@ -19,7 +19,9 @@ def test_should_return_200_when_all_usecases_succeed(
     mock_line_uc_cls,
 ):
     mock_weather_uc = MagicMock()
-    mock_weather_uc.handle.return_value = WeatherOutput(forecast="はれ")
+    mock_weather_uc.handle = AsyncMock(
+        return_value=WeatherOutput(forecast="はれ", min_temp=15, max_temp=30)
+    )
     mock_weather_uc_cls.return_value = mock_weather_uc
 
     mock_train_uc = MagicMock()
@@ -75,32 +77,63 @@ def test_should_return_200_when_all_usecases_succeed(
 def test_should_return_500_when_exception_occurs(
     exception_cls, usecase_patch, side_effect_index
 ):
+    # 1. setup
     with patch("lambda_function.WeatherUsecase") as mock_weather_uc_cls, patch(
         "lambda_function.TrainInfoUsecase"
     ) as mock_train_uc_cls, patch(usecase_patch) as mock_uc_cls:
+
         mock_weather_uc = MagicMock()
-        mock_weather_uc.handle.return_value = WeatherOutput(forecast="はれ")
+        mock_weather_uc.handle = AsyncMock(
+            return_value=WeatherOutput(
+                forecast="はれ", min_temp=15, max_temp=30
+            )
+        )
         mock_weather_uc_cls.return_value = mock_weather_uc
+
         mock_train_uc = MagicMock()
         mock_train_uc.handle.return_value = TrainInfoOutput(abnormal_train=[])
         mock_train_uc_cls.return_value = mock_train_uc
 
+        # 2. patch failures
         if usecase_patch.endswith("RecommendArticleUsecase"):
             mock_qiita_uc = MagicMock()
-            mock_qiita_uc.handle.side_effect = (
-                exception_cls if side_effect_index == 0 else None
-            )
+            if side_effect_index == 0:
+                mock_qiita_uc.handle.side_effect = exception_cls
+            else:
+                mock_qiita_uc.handle.return_value = RecommendOutput(
+                    items=[
+                        Item(
+                            title="Qiita Article",
+                            url="https://qiita.com/article1",
+                            likes_count=10,
+                        )
+                    ]
+                )
+
             mock_zenn_uc = MagicMock()
-            mock_zenn_uc.handle.side_effect = (
-                exception_cls if side_effect_index == 1 else None
-            )
+            if side_effect_index == 1:
+                mock_zenn_uc.handle.side_effect = exception_cls
+            else:
+                mock_zenn_uc.handle.return_value = RecommendOutput(
+                    items=[
+                        Item(
+                            title="Zenn Article",
+                            url="https://zenn.dev/article1",
+                            likes_count=5,
+                        )
+                    ]
+                )
+
             mock_uc_cls.side_effect = [mock_qiita_uc, mock_zenn_uc]
+
             with patch("lambda_function.LineUsecase") as mock_line_uc_cls:
                 mock_line_uc = MagicMock()
                 mock_line_uc.handle.return_value = None
                 mock_line_uc_cls.return_value = mock_line_uc
-                # 2. execute
+
+                # 3. execute
                 result = lambda_handler({}, {})
+
         else:
             mock_qiita_uc = MagicMock()
             mock_qiita_uc.handle.return_value = RecommendOutput(
@@ -122,19 +155,21 @@ def test_should_return_500_when_exception_occurs(
                     )
                 ]
             )
+
             with patch(
                 "lambda_function.RecommendArticleUsecase"
-            ) as mock_recommend_uc_cls:
-                mock_recommend_uc_cls.side_effect = [
-                    mock_qiita_uc,
-                    mock_zenn_uc,
-                ]
-                with patch("lambda_function.LineUsecase") as mock_line_uc_cls:
-                    mock_line_uc = MagicMock()
-                    mock_line_uc.handle.side_effect = exception_cls
-                    mock_line_uc_cls.return_value = mock_line_uc
-                    # 2. execute
-                    result = lambda_handler({}, {})
+            ) as mock_rec_cls, patch(
+                "lambda_function.LineUsecase"
+            ) as mock_line_uc_cls:
 
-    # 3. verify
+                mock_rec_cls.side_effect = [mock_qiita_uc, mock_zenn_uc]
+
+                mock_line_uc = MagicMock()
+                mock_line_uc.handle.side_effect = exception_cls
+                mock_line_uc_cls.return_value = mock_line_uc
+
+                # 3. execute
+                result = lambda_handler({}, {})
+
+    # 4. verify
     assert result["status_code"] == 500
