@@ -1,62 +1,101 @@
-# 概要
-テック記事からおすすめの記事を抽出して、LNEに通知する  
-LINEの環境変数は自分で[Line Developer](https://developers.line.biz/ja/)で発行する
+# Overview
 
-AWS Lambdaで動かすことを想定している
+This system collects and recommends trending tech articles and sends notifications to a LINE account.
+It is designed to run on **AWS Lambda** and currently supports:
 
-対応記事
-* Qiita
+* ✅ Qiita
+* ✅ Zenn
+* 🚇 Osaka Metro train status
+* ☀️ Weather forecast in Osaka
 
-# ロジック
-Qiita
-* 直近3日間くらいの記事を取得して、いいねが多い数に5つ抽出する
+> LINE credentials (User ID, Bearer Token) must be obtained from [LINE Developers](https://developers.line.biz/en/).
 
-# ローカルで動かす
-QiitaAPIは1時間に60回までなので注意(1度の実行で10回リクエストする)
-```sh
+---
+
+# Features
+
+* Fetches articles from Qiita and Zenn
+* Selects the top 5 most liked articles from each platform within the last 3 days
+* Scrapes Osaka Metro's delay information
+* Gets daily weather forecast from the Japan Meteorological Agency (JMA)
+* Formats and sends all data as LINE messages
+
+---
+
+# Required Environment Variables
+
+The following environment variables must be set to run the Lambda function:
+
+| Variable Name       | Description                         |
+| ------------------- | ----------------------------------- |
+| `LINE_USER_ID`      | LINE user ID to send messages to    |
+| `LINE_BEARER_TOKEN` | Bearer token for LINE Messaging API |
+
+These should be securely stored using AWS Lambda's environment variable settings.
+
+# Run Locally
+
+```bash
 python driver.py
 ```
 
-# 単体テスト
-```
-python -m unittest
+> ⚠️ The Qiita API has a rate limit of 60 requests per hour.
+> One execution makes 10 requests, so be careful not to exceed the limit.
+
+---
+
+# Run Unit Tests
+
+```bash
+python -m pytest
 ```
 
-# Deploy手順
-AWS Lambdaで動かす
+---
 
-## 1 作業用ディレクトリの作成
-```
+# Deploy to AWS Lambda
+
+## Step 1: Create a working directory
+
+```bash
 mkdir lambda_package
 ```
 
-## 2 依存関係のインストール
-```
+## Step 2: Install dependencies
+
+```bash
 pip install -r requirements.txt -t lambda_package/
 ```
 
-## 3 Lambda関数のPythonファイルをコピー
-```
+## Step 3: Copy project files
+
+```bash
 cp -r application domain infrastructure lambda_function.py lambda_package/
 ```
 
-## 4 ZIPファイルの作成
-```
+## Step 4: Create a ZIP file
+
+```bash
 cd lambda_package
 zip -r ../lambda_package.zip .
 ```
 
-## 5 Lambdaに手動でアップロード
-手動でAWSの画面で生成したZipをアップロード
+## Step 5: Upload to AWS Lambda
 
-## 6 削除
-```
+* Go to AWS Console
+* Choose the Lambda function
+* Upload the `lambda_package.zip` manually
+
+## Step 6: Clean up
+
+```bash
 cd ..
-rm -rf lambda_package
-rm -rf lambda_package.zip
+rm -rf lambda_package lambda_package.zip
 ```
 
-# pychacheをいったん消したいとき
-```
+---
+
+# Clear `__pycache__` (Optional)
+
+```bash
 find . -type d -name __pycache__ -exec rm -r {} \+
 ```
