@@ -4,7 +4,7 @@ from infrastructure.repository.line_notification_repository import (
     LineNotificationRepository,
 )
 from application.base import IInput, IUsecase
-from domain.item import Item
+from application.domain.item import Item
 from datetime import datetime
 import pytz
 import logging

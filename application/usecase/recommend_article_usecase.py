@@ -1,7 +1,7 @@
 from typing import List
 from application.port.article_port import IArticleRepository
 from application.base import IOutput, IUsecase
-from domain.item import Item
+from application.domain.item import Item
 from pydantic import BaseModel
 
 

@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 from application.usecase.line_usecase import LineUsecase, LineSendInput
-from domain.item import Item
+from application.domain.item import Item
 
 
 @pytest.fixture

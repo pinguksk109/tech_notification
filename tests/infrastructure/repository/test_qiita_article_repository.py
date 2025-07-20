@@ -4,7 +4,7 @@ from infrastructure.repository.qiita_article_repository import (
     QiitaArticleRepository,
 )
 from http import HTTPStatus
-from domain.item import Item
+from application.domain.item import Item
 from typing import List, Dict, Any
 
 

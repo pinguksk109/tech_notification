@@ -3,7 +3,7 @@ from typing import List
 import requests
 from http import HTTPStatus
 from application.port.article_port import IArticleRepository
-from domain.item import Item
+from application.domain.item import Item
 
 
 logger = logging.getLogger(__name__)

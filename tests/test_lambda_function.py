@@ -5,7 +5,7 @@ from application.usecase.line_usecase import LineUsecase
 from application.usecase.train_info_usecase import TrainInfoOutput
 from application.usecase.weather_usecase import WeatherOutput
 from application.usecase.recommend_article_usecase import RecommendOutput
-from domain.item import Item
+from application.domain.item import Item
 
 
 @patch("lambda_function.LineUsecase")

@@ -4,7 +4,7 @@ from infrastructure.repository.zenn_article_repository import (
     ZennArticleRepository,
 )
 from http import HTTPStatus
-from domain.item import Item
+from application.domain.item import Item
 from typing import Dict, Any, List
 
 

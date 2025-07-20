@@ -4,7 +4,7 @@ from application.usecase.recommend_article_usecase import (
     RecommendArticleUsecase,
     RecommendOutput,
 )
-from domain.item import Item
+from application.domain.item import Item
 
 
 @pytest.fixture
