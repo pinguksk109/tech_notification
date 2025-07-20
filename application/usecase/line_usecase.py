@@ -42,7 +42,7 @@ class LineUsecase(IUsecase[None]):
 
     def _media_message(self, items: List[Item], media: str) -> str:
         lines = [f"{i+1}. {it.title} {it.url}" for i, it in enumerate(items)]
-        header = f"{self.today_date} の{media}おすすめ記事\n"
+        header = f"{self.today_date} の{media}おすすめ記事を送ります✍\n"
         return header + "\n".join(lines)
 
     def _train_message(self, abnormal: List[str]) -> str:

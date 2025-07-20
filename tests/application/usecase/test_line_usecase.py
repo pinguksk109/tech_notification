@@ -44,12 +44,12 @@ def test_処理が終了すること(line_usecase):
 
     # 3. verify
     expected_qiita_message = (
-        f"2024-01-01のQiitaおすすめ記事を送ります✍\n\n"
+        "2024-01-01 のQiitaおすすめ記事を送ります✍\n"
         "1. Qiita記事1 https://qiita.com/article1\n"
         "2. Qiita記事2 https://qiita.com/article2"
     )
     expected_zenn_message = (
-        f"2024-01-01のZennおすすめ記事を送ります✍\n\n"
+        "2024-01-01 のZennおすすめ記事を送ります✍\n"
         "1. Zenn記事1 https://zenn.dev/article1"
     )
 
