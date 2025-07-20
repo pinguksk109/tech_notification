@@ -1,4 +1,7 @@
+from typing import Any, Dict
 import requests
+import os
+import json
 from http import HTTPStatus
 from application.port.weather_port import IWeatherRepository
 from application.domain.weather import Weather
