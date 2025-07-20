@@ -1,6 +1,6 @@
 from typing import List
 from application.port.article_port import IArticleRepository
-from application.base import IOutput
+from application.base import IOutput, IUsecase
 from domain.item import Item
 from pydantic import BaseModel
 
@@ -9,7 +9,7 @@ class RecommendOutput(IOutput, BaseModel):
     items: List[Item]
 
 
-class RecommendArticleUsecase:
+class RecommendArticleUsecase(IUsecase[RecommendOutput]):
     def __init__(self, repository: IArticleRepository):
         self.repository = repository
 

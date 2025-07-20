@@ -1,136 +1,140 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from lambda_function import lambda_handler
-from application.usecase.tech_recommend_usecase import TechRecommendUsecase, QiitaRecommendOutput, ZennRecommendOutput
 from application.usecase.line_usecase import LineUsecase
 from application.usecase.train_info_usecase import TrainInfoOutput
 from application.usecase.weather_usecase import WeatherOutput
+from application.usecase.recommend_article_usecase import RecommendOutput
 from domain.item import Item
 
-@pytest.fixture
-def mock_usecases():
-    with patch('lambda_function.LineUsecase') as mock_line_usecase, \
-        patch('lambda_function.TechRecommendUsecase') as mock_tech_recommend_usecase, \
-        patch('lambda_function.QiitaApiRepository') as mock_qiita_repository, \
-        patch('lambda_function.ZennApiRepository') as mock_zenn_repository, \
-        patch('lambda_function.TrainInfoUsecase') as mock_train_info_usecase, \
-        patch('lambda_function.WeatherUsecase') as mock_weather_usecase, \
-        patch('lambda_function.WeatherRepository') as mock_weather_repository, \
-        patch('lambda_function.ScraperRepository') as mock_scraper_repository:
 
-        yield {
-            'mock_line_usecase': mock_line_usecase,
-            'mock_tech_recommend_usecase': mock_tech_recommend_usecase,
-            'mock_qiita_repository': mock_qiita_repository,
-            'mock_zenn_repository': mock_zenn_repository,
-            'mock_train_info_usecase': mock_train_info_usecase,
-            'mock_weather_usecase': mock_weather_usecase,
-            'mock_weather_repository': mock_weather_repository,
-            'mock_scraper_repository': mock_scraper_repository,
-        }
+@patch("lambda_function.LineUsecase")
+@patch("lambda_function.RecommendArticleUsecase")
+@patch("lambda_function.TrainInfoUsecase")
+@patch("lambda_function.WeatherUsecase")
+def test_should_return_200_when_all_usecases_succeed(
+    mock_weather_uc_cls,
+    mock_train_uc_cls,
+    mock_recommend_uc_cls,
+    mock_line_uc_cls,
+):
+    mock_weather_uc = MagicMock()
+    mock_weather_uc.handle.return_value = WeatherOutput(forecast="はれ")
+    mock_weather_uc_cls.return_value = mock_weather_uc
 
-def test_処理が成功した場合_200を返すこと(mock_usecases):
-    mock_tech_recommend_usecase = mock_usecases['mock_tech_recommend_usecase'].return_value
-    mock_tech_recommend_usecase.qiita_handle.return_value = QiitaRecommendOutput(
-        items=[Item(title="Qiita Article", url="https://qiita.com/article1", likes_count=10)]
+    mock_train_uc = MagicMock()
+    mock_train_uc.handle.return_value = TrainInfoOutput(abnormal_train=[])
+    mock_train_uc_cls.return_value = mock_train_uc
+
+    mock_qiita_uc = MagicMock()
+    mock_qiita_uc.handle.return_value = RecommendOutput(
+        items=[
+            Item(
+                title="Qiita Article",
+                url="https://qiita.com/article1",
+                likes_count=10,
+            )
+        ]
     )
-    mock_tech_recommend_usecase.zenn_handle.return_value = ZennRecommendOutput(
-        items=[Item(title="Zenn Article", url="https://zenn.dev/article1", likes_count=5)]
+    mock_zenn_uc = MagicMock()
+    mock_zenn_uc.handle.return_value = RecommendOutput(
+        items=[
+            Item(
+                title="Zenn Article",
+                url="https://zenn.dev/article1",
+                likes_count=5,
+            )
+        ]
     )
-    mock_train_info_usecase = mock_usecases['mock_train_info_usecase'].return_value
-    mock_train_info_usecase.handle.return_value = TrainInfoOutput(
-        abnormal_train=[]
-    )
-    mock_weather_usecase = mock_usecases['mock_weather_usecase'].return_value
-    mock_weather_usecase.handle.return_value = WeatherOutput(
-        forecast="はれ"
-    )
+    mock_recommend_uc_cls.side_effect = [mock_qiita_uc, mock_zenn_uc]
 
-    mock_line_usecase_instance = mock_usecases['mock_line_usecase'].return_value
-    mock_line_usecase_instance.handle = MagicMock()
+    mock_line_uc = MagicMock()
+    mock_line_uc_cls.return_value = mock_line_uc
 
-    event = {}
-    context = {}
+    actual = lambda_handler({}, {})
 
-    actual = lambda_handler(event, context)
+    assert actual == {"status_code": 200, "body": "Success"}
 
-    assert actual == {
-        "status_code": 200,
-        "body": "Success"
-    }
 
-def test_qiitaの処理でExceptionが発生した場合_500を返すこと(mock_usecases):
+@pytest.mark.parametrize(
+    "exception_cls, usecase_patch, side_effect_index",
+    [
+        (
+            Exception("Qiita error"),
+            "lambda_function.RecommendArticleUsecase",
+            0,
+        ),
+        (
+            Exception("Zenn error"),
+            "lambda_function.RecommendArticleUsecase",
+            1,
+        ),
+        (Exception("Line error"), "lambda_function.LineUsecase", None),
+    ],
+)
+def test_should_return_500_when_exception_occurs(
+    exception_cls, usecase_patch, side_effect_index
+):
+    with patch("lambda_function.WeatherUsecase") as mock_weather_uc_cls, patch(
+        "lambda_function.TrainInfoUsecase"
+    ) as mock_train_uc_cls, patch(usecase_patch) as mock_uc_cls:
+        mock_weather_uc = MagicMock()
+        mock_weather_uc.handle.return_value = WeatherOutput(forecast="はれ")
+        mock_weather_uc_cls.return_value = mock_weather_uc
+        mock_train_uc = MagicMock()
+        mock_train_uc.handle.return_value = TrainInfoOutput(abnormal_train=[])
+        mock_train_uc_cls.return_value = mock_train_uc
 
-    mock_tech_recommend_usecase = mock_usecases['mock_tech_recommend_usecase'].return_value
-    mock_tech_recommend_usecase.qiita_handle.side_effect = Exception("Qiita API error")
+        if usecase_patch.endswith("RecommendArticleUsecase"):
+            mock_qiita_uc = MagicMock()
+            mock_qiita_uc.handle.side_effect = (
+                exception_cls if side_effect_index == 0 else None
+            )
+            mock_zenn_uc = MagicMock()
+            mock_zenn_uc.handle.side_effect = (
+                exception_cls if side_effect_index == 1 else None
+            )
+            mock_uc_cls.side_effect = [mock_qiita_uc, mock_zenn_uc]
+            with patch("lambda_function.LineUsecase") as mock_line_uc_cls:
+                mock_line_uc = MagicMock()
+                mock_line_uc.handle.return_value = None
+                mock_line_uc_cls.return_value = mock_line_uc
+                # 2. execute
+                result = lambda_handler({}, {})
+        else:
+            mock_qiita_uc = MagicMock()
+            mock_qiita_uc.handle.return_value = RecommendOutput(
+                items=[
+                    Item(
+                        title="Qiita Article",
+                        url="https://qiita.com/article1",
+                        likes_count=10,
+                    )
+                ]
+            )
+            mock_zenn_uc = MagicMock()
+            mock_zenn_uc.handle.return_value = RecommendOutput(
+                items=[
+                    Item(
+                        title="Zenn Article",
+                        url="https://zenn.dev/article1",
+                        likes_count=5,
+                    )
+                ]
+            )
+            with patch(
+                "lambda_function.RecommendArticleUsecase"
+            ) as mock_recommend_uc_cls:
+                mock_recommend_uc_cls.side_effect = [
+                    mock_qiita_uc,
+                    mock_zenn_uc,
+                ]
+                with patch("lambda_function.LineUsecase") as mock_line_uc_cls:
+                    mock_line_uc = MagicMock()
+                    mock_line_uc.handle.side_effect = exception_cls
+                    mock_line_uc_cls.return_value = mock_line_uc
+                    # 2. execute
+                    result = lambda_handler({}, {})
 
-    mock_train_info_usecase = mock_usecases['mock_train_info_usecase'].return_value
-    mock_train_info_usecase.handle.return_value = TrainInfoOutput(
-        abnormal_train=[]
-    )
-
-    mock_weather_usecase = mock_usecases['mock_weather_usecase'].return_value
-    mock_weather_usecase.handle.return_value = WeatherOutput(
-        forecast="はれ"
-    )
-
-    event = {}
-    context = {}
-
-    actual = lambda_handler(event, context)
-
-    assert actual["status_code"] == 500
-
-def test_zennの処理でExceptionが発生した場合_500を返すこと(mock_usecases):
-
-    mock_tech_recommend_usecase = mock_usecases['mock_tech_recommend_usecase'].return_value
-    mock_tech_recommend_usecase.qiita_handle.return_value = QiitaRecommendOutput(
-        items=[Item(title="Qiita Article", url="https://qiita.com/article1", likes_count=10)]
-    )
-    mock_tech_recommend_usecase.zenn_handle.side_effect = Exception("Zenn API error")
-
-    mock_train_info_usecase = mock_usecases['mock_train_info_usecase'].return_value
-    mock_train_info_usecase.handle.return_value = TrainInfoOutput(
-        abnormal_train=[]
-    )
-
-    mock_weather_usecase = mock_usecases['mock_weather_usecase'].return_value
-    mock_weather_usecase.handle.return_value = WeatherOutput(
-        forecast="はれ"
-    )
-
-    event = {}
-    context = {}
-
-    actual = lambda_handler(event, context)
-
-    assert actual["status_code"] == 500
-
-def test_メッセージ送信の処理でExceptionが発生した場合_500を返すこと(mock_usecases):
-    mock_tech_recommend_usecase = mock_usecases['mock_tech_recommend_usecase'].return_value
-    mock_tech_recommend_usecase.qiita_handle.return_value = QiitaRecommendOutput(
-        items=[Item(title="Qiita Article", url="https://qiita.com/article1", likes_count=10)]
-    )
-    mock_tech_recommend_usecase.zenn_handle.return_value = ZennRecommendOutput(
-        items=[Item(title="Zenn Article", url="https://zenn.dev/article1", likes_count=5)]
-    )
-
-    mock_train_info_usecase = mock_usecases['mock_train_info_usecase'].return_value
-    mock_train_info_usecase.handle.return_value = TrainInfoOutput(
-        abnormal_train=[]
-    )
-
-    mock_weather_usecase = mock_usecases['mock_weather_usecase'].return_value
-    mock_weather_usecase.handle.return_value = WeatherOutput(
-        forecast="はれ"
-    )
-
-    mock_line_usecase_instance = mock_usecases['mock_line_usecase'].return_value
-    mock_line_usecase_instance.handle.side_effect = Exception("Line API error")
-
-    event = {}
-    context = {}
-
-    actual = lambda_handler(event, context)
-
-    assert actual["status_code"] == 500
+    # 3. verify
+    assert result["status_code"] == 500

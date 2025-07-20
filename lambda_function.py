@@ -5,7 +5,9 @@ from application.usecase.weather_usecase import WeatherUsecase
 from application.usecase.recommend_article_usecase import (
     RecommendArticleUsecase,
 )
-from infrastructure.repository.line_repository import LineRepository
+from infrastructure.repository.line_notification_repository import (
+    LineNotificationRepository,
+)
 from infrastructure.repository.osaka_metro_repository import (
     OsakaMetroRepository,
 )
@@ -18,36 +20,27 @@ from infrastructure.repository.zenn_article_repository import (
 )
 
 
+def _gather_all_info():
+    weather_out = WeatherUsecase(WeatherRepository()).handle()
+    train_out = TrainInfoUsecase(OsakaMetroRepository()).handle()
+    qiita_out = RecommendArticleUsecase(QiitaArticleRepository()).handle()
+    zenn_out = RecommendArticleUsecase(ZennArticleRepository()).handle()
+
+    return {
+        "weather_forecast": weather_out.forecast,
+        "abnormal_train": train_out.abnormal_train,
+        "qiita_items": qiita_out.items,
+        "zenn_items": zenn_out.items,
+    }
+
+
 def lambda_handler(event, context):
 
     try:
-
-        weather_repository = WeatherRepository()
-        weather_usecase = WeatherUsecase(weather_repository)
-        weather_output = weather_usecase.handle()
-
-        scraper_repository = OsakaMetroRepository()
-        train_info_usecase = TrainInfoUsecase(scraper_repository)
-        train_output = train_info_usecase.handle()
-
-        usecase_qiita = RecommendArticleUsecase(QiitaArticleRepository())
-        output_qiita = usecase_qiita.handle()
-        usecase_zenn = RecommendArticleUsecase(ZennArticleRepository())
-        output_zenn = usecase_zenn.handle()
-
-        line_repository = LineRepository()
-        line_usecase = LineUsecase(line_repository)
-        line_usecase.handle(
-            LineSendInput(
-                qiita_items=output_qiita.items,
-                zenn_items=output_zenn.items,
-                abnormal_train=train_output.abnormal_train,
-                weather_forecast=weather_output.forecast,
-            )
-        )
-
+        info = _gather_all_info()
+        line_uc = LineUsecase(LineNotificationRepository())
+        line_uc.handle(LineSendInput(**info))
         return {"status_code": 200, "body": "Success"}
-
     except Exception as e:
         return {
             "status_code": 500,

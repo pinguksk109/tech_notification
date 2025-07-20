@@ -1,9 +1,6 @@
 from typing import List
 from pydantic import BaseModel
-from infrastructure.repository.osaka_metro_repository import (
-    OsakaMetroRepository,
-)
-from application.base import IOutput
+from application.base import IOutput, IUsecase
 from application.port.train_info_port import ITrainInfoPort
 
 
@@ -11,7 +8,7 @@ class TrainInfoOutput(IOutput, BaseModel):
     abnormal_train: List[str]
 
 
-class TrainInfoUsecase:
+class TrainInfoUsecase(IUsecase[TrainInfoOutput]):
     def __init__(self, train_info_repository: ITrainInfoPort):
         self.train_info_repository = train_info_repository
 
