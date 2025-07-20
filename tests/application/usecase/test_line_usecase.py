@@ -31,12 +31,16 @@ def test_処理が終了すること(line_usecase):
     ]
     abnormal_train = []
     weather_forecast = "はれ"
+    min_temp = 10
+    max_temp = 25
 
     input_data = LineSendInput(
         qiita_items=qiita_items,
         zenn_items=zenn_items,
         abnormal_train=abnormal_train,
         weather_forecast=weather_forecast,
+        min_temp=min_temp,
+        max_temp=max_temp,
     )
 
     # 2. execute
@@ -44,12 +48,12 @@ def test_処理が終了すること(line_usecase):
 
     # 3. verify
     expected_qiita_message = (
-        "2024-01-01 のQiitaおすすめ記事を送ります✍\n"
+        "2024-01-01 のQiita今日の記事を送ります✍\n"
         "1. Qiita記事1 https://qiita.com/article1\n"
         "2. Qiita記事2 https://qiita.com/article2"
     )
     expected_zenn_message = (
-        "2024-01-01 のZennおすすめ記事を送ります✍\n"
+        "2024-01-01 のZenn今日の記事を送ります✍\n"
         "1. Zenn記事1 https://zenn.dev/article1"
     )
 

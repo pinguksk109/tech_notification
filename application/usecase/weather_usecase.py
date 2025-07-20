@@ -1,22 +1,36 @@
 from pydantic import BaseModel
 from application.port.weather_port import IWeatherRepository
+from application.port.llm_summary_port import LlmSummaryPort
 from application.base import IOutput, IUsecase
+
+
+class WeatherSummaryResponse(BaseModel):
+    summary: str
 
 
 class WeatherOutput(IOutput, BaseModel):
     forecast: str
+    min_temp: int
+    max_temp: int
 
 
 class WeatherUsecase(IUsecase[WeatherOutput]):
 
-    def __init__(self, weather_repository: IWeatherRepository):
-        self.weather_repository = weather_repository
+    def __init__(
+        self,
+        weather_repository: IWeatherRepository,
+        llm_repository: LlmSummaryPort,
+    ):
+        self._weather_repository = weather_repository
+        self._llm_repository = llm_repository
 
-    def handle(self) -> WeatherOutput:
-        # 大阪のエリアコードを代入
-        # エリアを知りたい場合はこちら: https://www.jma.go.jp/bosai/common/const/area.json
-        osaka_code = 270000
-        response = self.weather_repository.fetch(osaka_code)
+    async def handle(self) -> WeatherOutput:
+        data = self._weather_repository.fetch()
+        resp = await self._llm_repository.request(
+            data.forecast, WeatherSummaryResponse
+        )
         return WeatherOutput(
-            forecast=response[0]["timeSeries"][0]["areas"][0]["weathers"][0]
+            forecast=resp.summary,
+            min_temp=data.min_temp,
+            max_temp=data.max_temp,
         )

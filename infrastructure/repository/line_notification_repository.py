@@ -3,13 +3,21 @@ import json
 import requests
 from http import HTTPStatus
 from application.port.notification_port import INotificationPort
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class LineNotificationRepository(INotificationPort):
 
     def __init__(self):
-        self.to = os.environ["LINE_USER_ID"]
-        self.bearer_token = os.environ["LINE_BEARER_TOKEN"]
+        self.to = os.getenv("LINE_USER_ID")
+        self.bearer_token = os.getenv("LINE_BEARER_TOKEN")
+
+        if not self.to or not self.bearer_token:
+            raise ValueError(
+                "LINE_USER_ID または LINE_BEARER_TOKEN が .env から読み込めませんでした"
+            )
 
     def send(self, message: str) -> None:
         payload = {
