@@ -70,3 +70,21 @@ class LineUsecase(IUsecase[None]):
             )
         lines.append("詳細⇒https://www.jma.go.jp/bosai/forecast/")
         return "\n".join(lines)
+
+    def _weather_message(self, forecasts: List[CityWeather]) -> str:
+        header = [f"{self.today_date} の天気", ""]
+
+        body = [
+            line
+            for fc in forecasts
+            for line in [
+                f"■ {fc.city_name}",
+                fc.forecast,
+                f"🌡 最低気温: {fc.min_temp}℃ / 最高気温: {fc.max_temp}℃",
+                "",
+            ]
+        ]
+
+        footer = ["大阪市詳細⇒https://www.jma.go.jp/bosai/forecast/"]
+
+        return "\n".join(header + body + footer)
