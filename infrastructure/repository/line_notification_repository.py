@@ -40,7 +40,8 @@ class LineNotificationRepository(INotificationPort):
             )
         if resp.status_code != HTTPStatus.OK:
             raise Exception(
-                f"Line APIから200以外が返却されました。ステータスコード: {
-                    resp.status_code} レスポンス内容: {
-                    resp.text} メッセージリクエスト内容: {message}"
+                "Line APIから200以外が返却されました。"
+                f"ステータスコード: {resp.status_code} "
+                f"レスポンス内容: {resp.text} "
+                f"メッセージリクエスト内容: {message}"
             )

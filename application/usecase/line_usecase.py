@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 from infrastructure.repository.line_notification_repository import (
     LineNotificationRepository,
@@ -6,8 +6,8 @@ from infrastructure.repository.line_notification_repository import (
 from application.base import IInput, IUsecase
 from application.domain.item import Item
 from datetime import datetime
-import pytz
 import logging
+from zoneinfo import ZoneInfo
 
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
@@ -16,14 +16,14 @@ logger = logging.getLogger(__name__)
 class LineSendInput(IInput, BaseModel):
     qiita_items: List[Item]
     zenn_items: List[Item]
-    abnormal_train: List[str]
+    abnormal_train: List[str] = Field(default_factory=list)
     weather_forecast: str
     min_temp: int
     max_temp: int
 
 
 class LineUsecase(IUsecase[None]):
-    JST = pytz.timezone("Asia/Tokyo")
+    JST = ZoneInfo("Asia/Tokyo")
 
     def __init__(self, line_repository: LineNotificationRepository):
         self.line_repository = line_repository
@@ -34,7 +34,8 @@ class LineUsecase(IUsecase[None]):
             self._weather_message(
                 input.weather_forecast, input.min_temp, input.max_temp
             ),
-            self._train_message(input.abnormal_train),
+            # 大阪メトロ情報は通知停止。
+            # self._train_message(input.abnormal_train),
             self._media_message(input.qiita_items, "Qiita"),
             self._media_message(input.zenn_items, "Zenn"),
         ]

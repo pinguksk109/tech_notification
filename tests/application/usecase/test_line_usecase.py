@@ -59,4 +59,4 @@ def test_処理が終了すること(line_usecase):
 
     mock_line_repository.send.assert_any_call(expected_qiita_message)
     mock_line_repository.send.assert_any_call(expected_zenn_message)
-    assert mock_line_repository.send.call_count == 4
+    assert mock_line_repository.send.call_count == 3

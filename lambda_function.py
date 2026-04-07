@@ -2,19 +2,15 @@ import asyncio
 import json
 import logging
 from application.usecase.line_usecase import LineUsecase, LineSendInput
-from application.usecase.train_info_usecase import TrainInfoUsecase
 from application.usecase.weather_usecase import WeatherUsecase
 from application.usecase.recommend_article_usecase import (
     RecommendArticleUsecase,
 )
-from infrastructure.repository.gemini_summary_repository import (
-    GeminiSummaryRepository,
-)
 from infrastructure.repository.line_notification_repository import (
     LineNotificationRepository,
 )
-from infrastructure.repository.osaka_metro_repository import (
-    OsakaMetroRepository,
+from infrastructure.repository.gemini_summary_repository import (
+    GeminiSummaryRepository,
 )
 from infrastructure.repository.weather_repository import WeatherRepository
 from infrastructure.repository.qiita_article_repository import (
@@ -39,7 +35,8 @@ async def _gather_all_info():
         weather_repository=WeatherRepository(),
         llm_repository=GeminiSummaryRepository(),
     ).handle()
-    train_out = TrainInfoUsecase(OsakaMetroRepository()).handle()
+    # 大阪メトロ情報は一時停止中
+    # train_out = TrainInfoUsecase(OsakaMetroRepository()).handle()
     qiita_out = RecommendArticleUsecase(QiitaArticleRepository()).handle()
     zenn_out = RecommendArticleUsecase(ZennArticleRepository()).handle()
 
@@ -47,7 +44,7 @@ async def _gather_all_info():
         "weather_forecast": weather_out.forecast,
         "min_temp": weather_out.min_temp,
         "max_temp": weather_out.max_temp,
-        "abnormal_train": train_out.abnormal_train,
+        # "abnormal_train": train_out.abnormal_train,
         "qiita_items": qiita_out.items,
         "zenn_items": zenn_out.items,
     }

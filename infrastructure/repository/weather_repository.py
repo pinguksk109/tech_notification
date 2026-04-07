@@ -17,9 +17,9 @@ class WeatherRepository(IWeatherRepository):
         resp = requests.get(url)
         if resp.status_code != HTTPStatus.OK:
             raise Exception(
-                f"気象庁APIから200以外が返却されました。ステータスコード: {
-                    resp.status_code} レスポンス内容: {
-                    resp.text}"
+                "気象庁APIから200以外が返却されました。"
+                f"ステータスコード: {resp.status_code} "
+                f"レスポンス内容: {resp.text}"
             )
         data = resp.json()
         frt = data[0]["timeSeries"][0]["areas"][0]["weathers"][0]
