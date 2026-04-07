@@ -13,13 +13,18 @@ logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
+class CityWeatherInput(BaseModel):
+    city_name: str
+    forecast: str
+    min_temp: int
+    max_temp: int
+
+
 class LineSendInput(IInput, BaseModel):
     qiita_items: List[Item]
     zenn_items: List[Item]
     abnormal_train: List[str] = Field(default_factory=list)
-    weather_forecast: str
-    min_temp: int
-    max_temp: int
+    weather_forecasts: List[CityWeatherInput]
 
 
 class LineUsecase(IUsecase[None]):
@@ -31,9 +36,7 @@ class LineUsecase(IUsecase[None]):
 
     def handle(self, input: LineSendInput) -> None:
         messages = [
-            self._weather_message(
-                input.weather_forecast, input.min_temp, input.max_temp
-            ),
+            self._weather_message(input.weather_forecasts),
             # 大阪メトロ情報は通知停止。
             # self._train_message(input.abnormal_train),
             self._media_message(input.qiita_items, "Qiita"),
@@ -60,12 +63,16 @@ class LineUsecase(IUsecase[None]):
             "詳細⇒https://subway.osakametro.co.jp/guide/subway_information.php"
         )
 
-    def _weather_message(
-        self, forecast: str, min_temp: int, max_temp: int
-    ) -> str:
-        return (
-            f"{self.today_date} の天気\n"
-            f"{forecast}\n"
-            f"🌡 最低気温: {min_temp}℃ / 最高気温: {max_temp}℃\n"
-            "詳細⇒https://www.jma.go.jp/bosai/forecast/"
-        )
+    def _weather_message(self, forecasts: List[CityWeatherInput]) -> str:
+        lines = [f"{self.today_date} の天気", ""]
+        for forecast in forecasts:
+            lines.extend(
+                [
+                    f"■ {forecast.city_name}",
+                    forecast.forecast,
+                    f"🌡 最低気温: {forecast.min_temp}℃ / 最高気温: {forecast.max_temp}℃",
+                    "",
+                ]
+            )
+        lines.append("詳細⇒https://www.jma.go.jp/bosai/forecast/")
+        return "\n".join(lines)

@@ -12,7 +12,7 @@ class DummyResponse(BaseModel):
 
 @pytest.mark.skip
 @pytest.mark.asyncio
-async def test_return_response():
+async def test_should_return_summary_when_request_is_called():
     # 1. setup
     os.environ.setdefault("GEMINI_API_KEY", "hoge")
     repo = GeminiSummaryRepository()

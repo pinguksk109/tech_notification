@@ -12,10 +12,22 @@ def test_should_return_200_when_all_usecases_succeed(
     mock_line_repository_cls,
     mock_gather_all_info,
 ):
+    # 1. setup
     mock_gather_all_info.return_value = {
-        "weather_forecast": "はれ",
-        "min_temp": 15,
-        "max_temp": 30,
+        "weather_forecasts": [
+            {
+                "city_name": "大阪市",
+                "forecast": "はれ",
+                "min_temp": 15,
+                "max_temp": 30,
+            },
+            {
+                "city_name": "ハノイ市",
+                "forecast": "気温予報",
+                "min_temp": 25,
+                "max_temp": 36,
+            },
+        ],
         "qiita_items": [
             Item(
                 title="Qiita Article",
@@ -36,8 +48,10 @@ def test_should_return_200_when_all_usecases_succeed(
     mock_line_uc = MagicMock()
     mock_line_uc_cls.return_value = mock_line_uc
 
+    # 2. execute
     actual = lambda_handler({}, {})
 
+    # 3. verify
     assert actual == {"status_code": 200, "body": "Success"}
 
 
@@ -48,7 +62,7 @@ def test_should_return_200_when_all_usecases_succeed(
         (Exception("Line error"), "lambda_function.LineUsecase"),
     ],
 )
-def test_should_return_500_when_exception_occurs(exception_cls, patch_target):
+def test_should_return_500_when_exception_is_raised(exception_cls, patch_target):
     # 1. setup
     with patch("lambda_function._gather_all_info") as mock_gather_all_info, patch(
         "infrastructure.repository.line_notification_repository.LineNotificationRepository"
@@ -56,9 +70,20 @@ def test_should_return_500_when_exception_occurs(exception_cls, patch_target):
         patch_target
     ) as mock_target:
         mock_gather_all_info.return_value = {
-            "weather_forecast": "はれ",
-            "min_temp": 15,
-            "max_temp": 30,
+            "weather_forecasts": [
+                {
+                    "city_name": "大阪市",
+                    "forecast": "はれ",
+                    "min_temp": 15,
+                    "max_temp": 30,
+                },
+                {
+                    "city_name": "ハノイ市",
+                    "forecast": "気温予報",
+                    "min_temp": 25,
+                    "max_temp": 36,
+                },
+            ],
             "qiita_items": [
                 Item(
                     title="Qiita Article",

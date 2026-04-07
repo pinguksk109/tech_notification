@@ -55,35 +55,39 @@ def mock_qiita_response() -> List[Dict[str, Any]]:
 
 
 @pytest.mark.skip
-def test_return_response():
+def test_should_return_items_when_fetch_items_is_called_with_real_api():
+    # 1. setup
     repo = QiitaArticleRepository()
+
+    # 2. execute
     try:
         items = repo.fetch_items(page=1)
     except Exception as e:
         print(e)
         raise e
+
+    # 3. verify
     print(items)
 
 
 @patch("infrastructure.repository.qiita_article_repository.requests.get")
-def test_処理が成功した場合_fetch_itemsがItemリストを返す(
+def test_should_return_items_when_qiita_api_returns_ok_response(
     mock_get, mock_qiita_response
 ):
-    # Arrange
+    # 1. setup
     mock_response = Mock()
     mock_response.status_code = HTTPStatus.OK
     mock_response.json.return_value = mock_qiita_response
     mock_get.return_value = mock_response
     repo = QiitaArticleRepository()
 
-    # Act
+    # 2. execute
     result = repo.fetch_items(page=1)
 
-    # Assert
+    # 3. verify
     assert isinstance(result, list)
     assert all(isinstance(item, Item) for item in result)
     assert len(result) == 1
-    # 各フィールドが正しくマッピングされていること
     src = mock_qiita_response[0]
     item = result[0]
     assert item.title == src["title"]
@@ -92,42 +96,48 @@ def test_処理が成功した場合_fetch_itemsがItemリストを返す(
 
 
 @patch("infrastructure.repository.qiita_article_repository.requests.get")
-def test_レートリミットの場合_Exceptionをスローすること(mock_get):
-    # Arrange
+def test_should_raise_exception_when_qiita_api_is_rate_limited(mock_get):
+    # 1. setup
     mock_response = Mock()
     mock_response.status_code = HTTPStatus.FORBIDDEN
     mock_response.text = "rate limit"
     mock_get.return_value = mock_response
     repo = QiitaArticleRepository()
 
-    # Act & Assert
+    # 2. execute
     with pytest.raises(Exception) as excinfo:
         repo.fetch_items(page=1)
+
+    # 3. verify
     assert "rate limited" in str(excinfo.value)
 
 
 @patch("infrastructure.repository.qiita_article_repository.requests.get")
-def test_500の場合_Exceptionをスローすること(mock_get):
-    # Arrange
+def test_should_raise_exception_when_qiita_api_returns_non_ok_status(mock_get):
+    # 1. setup
     mock_response = Mock()
     mock_response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
     mock_response.text = "internal server error"
     mock_get.return_value = mock_response
     repo = QiitaArticleRepository()
 
-    # Act & Assert
+    # 2. execute
     with pytest.raises(Exception) as excinfo:
         repo.fetch_items(page=1)
+
+    # 3. verify
     assert "Qiita API error" in str(excinfo.value)
 
 
 @patch("infrastructure.repository.qiita_article_repository.requests.get")
-def test_リクエストに失敗した場合_Exceptionをスローすること(mock_get):
-    # Arrange
+def test_should_raise_exception_when_qiita_request_fails(mock_get):
+    # 1. setup
     mock_get.side_effect = Exception("network error")
     repo = QiitaArticleRepository()
 
-    # Act & Assert
+    # 2. execute
     with pytest.raises(Exception) as excinfo:
         repo.fetch_items(page=1)
+
+    # 3. verify
     assert "network error" in str(excinfo.value)

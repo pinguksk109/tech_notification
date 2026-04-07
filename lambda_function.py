@@ -1,7 +1,10 @@
 import asyncio
 import json
 import logging
-from application.usecase.line_usecase import LineUsecase, LineSendInput
+from application.usecase.line_usecase import (
+    LineSendInput,
+    LineUsecase,
+)
 from application.usecase.weather_usecase import WeatherUsecase
 from application.usecase.recommend_article_usecase import (
     RecommendArticleUsecase,
@@ -13,6 +16,9 @@ from infrastructure.repository.gemini_summary_repository import (
     GeminiSummaryRepository,
 )
 from infrastructure.repository.weather_repository import WeatherRepository
+from infrastructure.repository.open_meteo_weather_repository import (
+    OpenMeteoWeatherRepository,
+)
 from infrastructure.repository.qiita_article_repository import (
     QiitaArticleRepository,
 )
@@ -32,7 +38,8 @@ logger.addHandler(handler)
 
 async def _gather_all_info():
     weather_out = await WeatherUsecase(
-        weather_repository=WeatherRepository(),
+        jma_weather_repository=WeatherRepository(),
+        open_meteo_weather_repository=OpenMeteoWeatherRepository(),
         llm_repository=GeminiSummaryRepository(),
     ).handle()
     # 大阪メトロ情報は一時停止中
@@ -41,9 +48,7 @@ async def _gather_all_info():
     zenn_out = RecommendArticleUsecase(ZennArticleRepository()).handle()
 
     return {
-        "weather_forecast": weather_out.forecast,
-        "min_temp": weather_out.min_temp,
-        "max_temp": weather_out.max_temp,
+        "weather_forecasts": weather_out.forecasts,
         # "abnormal_train": train_out.abnormal_train,
         "qiita_items": qiita_out.items,
         "zenn_items": zenn_out.items,
