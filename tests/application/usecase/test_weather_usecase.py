@@ -1,6 +1,7 @@
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
+from application.domain.weather import CityWeather
 from application.domain.weather import Weather
 from application.usecase.weather_usecase import (
     WeatherSummaryResponse,
@@ -38,6 +39,7 @@ def test_should_return_weather_forecasts_for_osaka_and_hanoi_when_handle_is_call
 
     # 3. verify
     assert len(actual.forecasts) == 2
+    assert isinstance(actual.forecasts[0], CityWeather)
     assert actual.forecasts[0].city_name == "大阪市"
     assert actual.forecasts[0].forecast == "大阪の要約予報"
     assert actual.forecasts[0].min_temp == 10

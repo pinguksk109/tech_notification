@@ -1,11 +1,11 @@
 import pytest
 from unittest.mock import MagicMock
 from application.usecase.line_usecase import (
-    CityWeatherInput,
     LineSendInput,
     LineUsecase,
 )
 from application.domain.item import Item
+from application.domain.weather import CityWeather
 
 
 @pytest.fixture
@@ -35,13 +35,13 @@ def test_should_return_three_messages_when_handle_is_called(line_usecase):
     ]
     abnormal_train = []
     weather_forecasts = [
-        CityWeatherInput(
+        CityWeather(
             city_name="大阪市",
             forecast="はれ",
             min_temp=10,
             max_temp=25,
         ),
-        CityWeatherInput(
+        CityWeather(
             city_name="ハノイ市",
             forecast="気温予報",
             min_temp=25,

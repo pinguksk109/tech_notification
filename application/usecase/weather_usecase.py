@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from application.domain.weather import CityWeather
 from application.port.weather_port import IWeatherRepository
 from application.port.llm_summary_port import LlmSummaryPort
 from application.base import IOutput, IUsecase
@@ -8,15 +9,8 @@ class WeatherSummaryResponse(BaseModel):
     summary: str
 
 
-class CityWeatherOutput(BaseModel):
-    city_name: str
-    forecast: str
-    min_temp: int
-    max_temp: int
-
-
 class WeatherOutput(IOutput, BaseModel):
-    forecasts: list[CityWeatherOutput]
+    forecasts: list[CityWeather]
 
 
 class WeatherUsecase(IUsecase[WeatherOutput]):
@@ -47,13 +41,13 @@ class WeatherUsecase(IUsecase[WeatherOutput]):
 
         return WeatherOutput(
             forecasts=[
-                CityWeatherOutput(
+                CityWeather(
                     city_name="大阪市",
                     forecast=osaka_resp.summary,
                     min_temp=osaka_data.min_temp,
                     max_temp=osaka_data.max_temp,
                 ),
-                CityWeatherOutput(
+                CityWeather(
                     city_name="ハノイ市",
                     forecast=hanoi_data.forecast,
                     min_temp=hanoi_data.min_temp,

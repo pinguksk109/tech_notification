@@ -5,6 +5,7 @@ from infrastructure.repository.line_notification_repository import (
 )
 from application.base import IInput, IUsecase
 from application.domain.item import Item
+from application.domain.weather import CityWeather
 from datetime import datetime
 import logging
 from zoneinfo import ZoneInfo
@@ -13,18 +14,11 @@ logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
-class CityWeatherInput(BaseModel):
-    city_name: str
-    forecast: str
-    min_temp: int
-    max_temp: int
-
-
 class LineSendInput(IInput, BaseModel):
     qiita_items: List[Item]
     zenn_items: List[Item]
     abnormal_train: List[str] = Field(default_factory=list)
-    weather_forecasts: List[CityWeatherInput]
+    weather_forecasts: List[CityWeather]
 
 
 class LineUsecase(IUsecase[None]):
@@ -63,7 +57,7 @@ class LineUsecase(IUsecase[None]):
             "詳細⇒https://subway.osakametro.co.jp/guide/subway_information.php"
         )
 
-    def _weather_message(self, forecasts: List[CityWeatherInput]) -> str:
+    def _weather_message(self, forecasts: List[CityWeather]) -> str:
         lines = [f"{self.today_date} の天気", ""]
         for forecast in forecasts:
             lines.extend(
