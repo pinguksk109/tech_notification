@@ -1,14 +1,17 @@
 import asyncio
 import json
 import logging
-from application.usecase.line_usecase import (
-    LineSendInput,
-    LineUsecase,
+from application.usecase.daily_notification_message_builder import (
+    DailyNotificationMessageBuilder,
 )
-from application.usecase.weather_usecase import WeatherUsecase
+from application.usecase.daily_notification_orchestrator import (
+    DailyNotificationOrchestrator,
+)
+from application.usecase.line_usecase import LineUsecase
 from application.usecase.recommend_article_usecase import (
     RecommendArticleUsecase,
 )
+from application.usecase.weather_usecase import WeatherUsecase
 from infrastructure.repository.line_notification_repository import (
     LineNotificationRepository,
 )
@@ -36,30 +39,26 @@ handler.setFormatter(
 logger.addHandler(handler)
 
 
-async def _gather_all_info():
-    weather_out = await WeatherUsecase(
-        jma_weather_repository=WeatherRepository(),
-        open_meteo_weather_repository=OpenMeteoWeatherRepository(),
-        llm_repository=GeminiSummaryRepository(),
-    ).handle()
-    # 大阪メトロ情報は一時停止中
-    # train_out = TrainInfoUsecase(OsakaMetroRepository()).handle()
-    qiita_out = RecommendArticleUsecase(QiitaArticleRepository()).handle()
-    zenn_out = RecommendArticleUsecase(ZennArticleRepository()).handle()
-
-    return {
-        "weather_forecasts": weather_out.forecasts,
-        # "abnormal_train": train_out.abnormal_train,
-        "qiita_items": qiita_out.items,
-        "zenn_items": zenn_out.items,
-    }
+def _build_daily_notification_orchestrator() -> DailyNotificationOrchestrator:
+    return DailyNotificationOrchestrator(
+        weather_usecase=WeatherUsecase(
+            jma_weather_repository=WeatherRepository(),
+            open_meteo_weather_repository=OpenMeteoWeatherRepository(),
+            llm_repository=GeminiSummaryRepository(),
+        ),
+        qiita_usecase=RecommendArticleUsecase(QiitaArticleRepository()),
+        zenn_usecase=RecommendArticleUsecase(ZennArticleRepository()),
+        line_usecase=LineUsecase(LineNotificationRepository()),
+        message_builder=DailyNotificationMessageBuilder(),
+    )
 
 
 def lambda_handler(event, context):
     try:
-        info = asyncio.run(_gather_all_info())
-        line_uc = LineUsecase(LineNotificationRepository())
-        line_uc.handle(LineSendInput(**info))
+        daily_notification_orchestrator = (
+            _build_daily_notification_orchestrator()
+        )
+        asyncio.run(daily_notification_orchestrator.handle())
         return {"status_code": 200, "body": "Success"}
     except Exception as e:
         logger.exception(str(e))
