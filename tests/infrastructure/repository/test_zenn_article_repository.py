@@ -41,31 +41,36 @@ def mock_zenn_response() -> Dict[str, List[Dict[str, Any]]]:
 
 
 @pytest.mark.skip
-def test_return_response():
+def test_should_return_items_when_fetch_items_is_called_with_real_api():
+    # 1. setup
     repo = ZennArticleRepository()
+
+    # 2. execute
     try:
         items = repo.fetch_items(page=1)
     except Exception as e:
         print(e)
         raise e
+
+    # 3. verify
     print(items)
 
 
 @patch("infrastructure.repository.zenn_article_repository.requests.get")
-def test_処理が成功した場合_fetch_itemsがItemリストを返す(
+def test_should_return_items_when_zenn_api_returns_ok_response(
     mock_get, mock_zenn_response
 ):
-    # Arrange
+    # 1. setup
     mock_response = Mock()
     mock_response.status_code = HTTPStatus.OK
     mock_response.json.return_value = mock_zenn_response
     mock_get.return_value = mock_response
     repo = ZennArticleRepository()
 
-    # Act
+    # 2. execute
     items = repo.fetch_items(page=1)
 
-    # Assert
+    # 3. verify
     assert isinstance(items, list)
     assert all(isinstance(item, Item) for item in items)
     assert len(items) == 1
@@ -77,27 +82,31 @@ def test_処理が成功した場合_fetch_itemsがItemリストを返す(
 
 
 @patch("infrastructure.repository.zenn_article_repository.requests.get")
-def test_status_not_ok_の場合_Exceptionをスローすること(mock_get):
-    # Arrange
+def test_should_raise_exception_when_zenn_api_returns_non_ok_status(mock_get):
+    # 1. setup
     mock_response = Mock()
     mock_response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
     mock_response.text = "internal server error"
     mock_get.return_value = mock_response
     repo = ZennArticleRepository()
 
-    # Act & Assert
+    # 2. execute
     with pytest.raises(Exception) as excinfo:
         repo.fetch_items(page=1)
+
+    # 3. verify
     assert "Zenn API error" in str(excinfo.value)
 
 
 @patch("infrastructure.repository.zenn_article_repository.requests.get")
-def test_requests_exception_の場合_Exceptionをスローすること(mock_get):
-    # Arrange
+def test_should_raise_exception_when_zenn_request_fails(mock_get):
+    # 1. setup
     mock_get.side_effect = Exception("network error")
     repo = ZennArticleRepository()
 
-    # Act & Assert
+    # 2. execute
     with pytest.raises(Exception) as excinfo:
         repo.fetch_items(page=1)
+
+    # 3. verify
     assert "network error" in str(excinfo.value)

@@ -6,7 +6,8 @@ It is designed to run on **AWS Lambda** and currently supports:
 * ✅ Qiita
 * ✅ Zenn
 * 🚇 Osaka Metro train status
-* ☀️ Weather forecast in Osaka (with AI summarization)
+* ☀️ Weather forecast in Osaka (JMA + Gemini summarization)
+* ☀️ Weather forecast in Hanoi (Open-Meteo)
 
 ---
 
@@ -15,8 +16,10 @@ It is designed to run on **AWS Lambda** and currently supports:
 * Fetches articles from Qiita and Zenn
 * Selects the top 5 most liked articles from each platform within the last 3 days
 * Scrapes Osaka Metro's delay information
-* Gets daily weather forecast from the Japan Meteorological Agency (JMA)
-* Weather forecast is summarized using AI (Gemini) because the raw JMA content is often difficult for general users to understand
+* `WeatherUsecase` aggregates weather forecasts for multiple cities
+* Gets Osaka daily weather forecast from the Japan Meteorological Agency (JMA)
+* Summarizes Osaka weather forecast using AI (Gemini) because the raw JMA content is often difficult for general users to understand
+* Gets Hanoi daily weather forecast from Open-Meteo
 * Formats and sends all data as LINE messages
 
 ---

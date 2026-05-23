@@ -12,7 +12,13 @@ class WeatherRepository(IWeatherRepository):
     OSAKA_AREA_CODE = 270000
     BASE_URL = "https://www.jma.go.jp/bosai/forecast/data/forecast"
 
-    def fetch(self) -> Weather:
+    def fetch(
+        self,
+        *,
+        latitude: float | None = None,
+        longitude: float | None = None,
+        timezone: str | None = None,
+    ) -> Weather:
         url = f"{self.BASE_URL}/{self.OSAKA_AREA_CODE}.json"
         resp = requests.get(url)
         if resp.status_code != HTTPStatus.OK:

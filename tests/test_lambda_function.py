@@ -1,90 +1,55 @@
-import pytest
-from unittest.mock import patch, MagicMock
+import sys
+import types
+from unittest.mock import AsyncMock, MagicMock, patch
+
+langchain_google_genai = types.ModuleType("langchain_google_genai")
+langchain_google_genai.ChatGoogleGenerativeAI = MagicMock()
+sys.modules["langchain_google_genai"] = langchain_google_genai
+
+langchain_core = types.ModuleType("langchain_core")
+langchain_core_prompts = types.ModuleType("langchain_core.prompts")
+langchain_core_prompts.PromptTemplate = MagicMock()
+sys.modules["langchain_core"] = langchain_core
+sys.modules["langchain_core.prompts"] = langchain_core_prompts
+
 from lambda_function import lambda_handler
-from application.domain.item import Item
 
 
-@patch("lambda_function._gather_all_info")
-@patch("infrastructure.repository.line_notification_repository.LineNotificationRepository")
-@patch("lambda_function.LineUsecase")
-def test_should_return_200_when_all_usecases_succeed(
-    mock_line_uc_cls,
-    mock_line_repository_cls,
-    mock_gather_all_info,
+@patch("lambda_function._build_daily_notification_orchestrator")
+def test_should_return_200_when_daily_notification_orchestrator_succeeds(
+    mock_build_daily_notification_orchestrator,
 ):
-    mock_gather_all_info.return_value = {
-        "weather_forecast": "はれ",
-        "min_temp": 15,
-        "max_temp": 30,
-        "qiita_items": [
-            Item(
-                title="Qiita Article",
-                url="https://qiita.com/article1",
-                likes_count=10,
-            )
-        ],
-        "zenn_items": [
-            Item(
-                title="Zenn Article",
-                url="https://zenn.dev/article1",
-                likes_count=5,
-            )
-        ],
-    }
+    # 1. setup
+    daily_notification_orchestrator = MagicMock()
+    daily_notification_orchestrator.handle = AsyncMock(return_value=None)
+    mock_build_daily_notification_orchestrator.return_value = (
+        daily_notification_orchestrator
+    )
 
-    mock_line_repository_cls.return_value = MagicMock()
-    mock_line_uc = MagicMock()
-    mock_line_uc_cls.return_value = mock_line_uc
-
+    # 2. execute
     actual = lambda_handler({}, {})
 
+    # 3. verify
     assert actual == {"status_code": 200, "body": "Success"}
+    mock_build_daily_notification_orchestrator.assert_called_once_with()
+    daily_notification_orchestrator.handle.assert_awaited_once_with()
 
 
-@pytest.mark.parametrize(
-    "exception_cls, patch_target",
-    [
-        (Exception("Gather error"), "lambda_function._gather_all_info"),
-        (Exception("Line error"), "lambda_function.LineUsecase"),
-    ],
-)
-def test_should_return_500_when_exception_occurs(exception_cls, patch_target):
+@patch("lambda_function._build_daily_notification_orchestrator")
+def test_should_return_500_when_daily_notification_orchestrator_raises(
+    mock_build_daily_notification_orchestrator,
+):
     # 1. setup
-    with patch("lambda_function._gather_all_info") as mock_gather_all_info, patch(
-        "infrastructure.repository.line_notification_repository.LineNotificationRepository"
-    ) as mock_line_repository_cls, patch(
-        patch_target
-    ) as mock_target:
-        mock_gather_all_info.return_value = {
-            "weather_forecast": "はれ",
-            "min_temp": 15,
-            "max_temp": 30,
-            "qiita_items": [
-                Item(
-                    title="Qiita Article",
-                    url="https://qiita.com/article1",
-                    likes_count=10,
-                )
-            ],
-            "zenn_items": [
-                Item(
-                    title="Zenn Article",
-                    url="https://zenn.dev/article1",
-                    likes_count=5,
-                )
-            ],
-        }
-        mock_line_repository_cls.return_value = MagicMock()
+    daily_notification_orchestrator = MagicMock()
+    daily_notification_orchestrator.handle = AsyncMock(
+        side_effect=Exception("Daily notification error")
+    )
+    mock_build_daily_notification_orchestrator.return_value = (
+        daily_notification_orchestrator
+    )
 
-        if patch_target.endswith("_gather_all_info"):
-            mock_target.side_effect = exception_cls
-        else:
-            mock_line_uc = MagicMock()
-            mock_line_uc.handle.side_effect = exception_cls
-            mock_target.return_value = mock_line_uc
-
-        # 2. execute
-        result = lambda_handler({}, {})
+    # 2. execute
+    result = lambda_handler({}, {})
 
     # 3. verify
     assert result["status_code"] == 500
